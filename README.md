@@ -17,7 +17,10 @@
                 "lightsail:Attach*",
                 "lightsail:Detach*",
                 "lightsail:OpenInstancePublicPorts",
-                "lightsail:CloseInstancePublicPorts"
+                "lightsail:CloseInstancePublicPorts",
+                "lightsail:PutInstancePublicPorts",
+                "lightsail:TagResource",
+                "lightsail:UntagResource"
             ],
             "Resource": "*"
         },
