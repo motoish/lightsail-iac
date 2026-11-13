@@ -36,7 +36,12 @@ resource "aws_lightsail_static_ip_attachment" "this" {
   instance_name  = aws_lightsail_instance.this.name
 }
 
-resource "aws_lightsail_instance_public_ports" "ssh_only" {
+moved {
+  from = aws_lightsail_instance_public_ports.ssh_only
+  to   = aws_lightsail_instance_public_ports.this
+}
+
+resource "aws_lightsail_instance_public_ports" "this" {
   instance_name = aws_lightsail_instance.this.name
 
   port_info {
@@ -44,5 +49,12 @@ resource "aws_lightsail_instance_public_ports" "ssh_only" {
     from_port = 22
     to_port   = 22
     cidrs     = var.ssh_allowed_cidrs
+  }
+
+  port_info {
+    protocol  = "udp"
+    from_port = var.wireguard_port
+    to_port   = var.wireguard_port
+    cidrs     = var.wireguard_allowed_cidrs
   }
 }

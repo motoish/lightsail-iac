@@ -39,3 +39,24 @@ variable "ssh_allowed_cidrs" {
     error_message = "ssh_allowed_cidrs must not open SSH to the whole internet (0.0.0.0/0)."
   }
 }
+
+variable "wireguard_port" {
+  description = "UDP port used by WireGuard"
+  type        = number
+  default     = 51820
+}
+
+variable "wireguard_allowed_cidrs" {
+  description = "CIDR blocks allowed to connect to WireGuard"
+  type        = list(string)
+
+  validation {
+    condition     = length(var.wireguard_allowed_cidrs) > 0 && alltrue([for c in var.wireguard_allowed_cidrs : can(cidrhost(c, 0))])
+    error_message = "wireguard_allowed_cidrs must contain at least one valid CIDR block."
+  }
+
+  validation {
+    condition     = !contains(var.wireguard_allowed_cidrs, "0.0.0.0/0")
+    error_message = "wireguard_allowed_cidrs must not open WireGuard to the whole internet (0.0.0.0/0)."
+  }
+}
