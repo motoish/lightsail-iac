@@ -229,7 +229,7 @@ extract_value() {
 backup_if_exists() {
   local file="$1"
   [[ -f "$file" ]] || return 0
-  cp -p "$file" "${file}.bak.$(date +%Y%m%d%H%M%S)"
+  cp -p "$file" "${file}.bak"
 }
 
 write_wireguard_client_config() {
