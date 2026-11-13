@@ -125,7 +125,18 @@ fi
 # --- sing-box (Shadowsocks 2022) --------------------------------------------
 install -d /etc/sing-box
 SB_CHANGED=0
-if [ ! -s /etc/sing-box/config.json ]; then
+# The sing-box package ships a default config (Shadowsocks on port 8080), so only reuse
+# an existing config when it already is ours: a Shadowsocks inbound on port 8388.
+KEPT_PASSWORD="$(python3 -c '
+import json
+try:
+    d = json.load(open("/etc/sing-box/config.json"))
+    print(next(i["password"] for i in d["inbounds"] if i.get("type") == "shadowsocks" and i.get("listen_port") == 8388))
+except Exception:
+    pass
+')"
+if [ -z "$KEPT_PASSWORD" ]; then
+  if [ -s /etc/sing-box/config.json ]; then cp /etc/sing-box/config.json /etc/sing-box/config.json.bak; fi
   NEW_PASSWORD="$(sing-box generate rand --base64 16)"
   cat > /etc/sing-box/config.json <<SBCONF
 {
@@ -151,6 +162,12 @@ fi
 sing-box check -c /etc/sing-box/config.json
 systemctl enable sing-box
 if [ "$SB_CHANGED" = 1 ]; then systemctl restart sing-box; else systemctl start sing-box; fi
+
+sleep 2
+if ! ss -tln | grep -q ':8388 '; then
+  echo "sing-box is not listening on TCP 8388. Check: sudo journalctl -u sing-box -n 30" >&2
+  exit 1
+fi
 
 SS_PASSWORD="$(python3 -c 'import json; d = json.load(open("/etc/sing-box/config.json")); print([i["password"] for i in d["inbounds"] if i["type"] == "shadowsocks"][0])')"
 printf 'SS_PASSWORD=%s\n' "$SS_PASSWORD" >&3
