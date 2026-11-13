@@ -57,4 +57,18 @@ resource "aws_lightsail_instance_public_ports" "this" {
     to_port   = var.wireguard_port
     cidrs     = var.wireguard_allowed_cidrs
   }
+
+  port_info {
+    protocol  = "tcp"
+    from_port = var.proxy_port
+    to_port   = var.proxy_port
+    cidrs     = var.proxy_allowed_cidrs
+  }
+
+  port_info {
+    protocol  = "udp"
+    from_port = var.proxy_port
+    to_port   = var.proxy_port
+    cidrs     = var.proxy_allowed_cidrs
+  }
 }

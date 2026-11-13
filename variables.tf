@@ -60,3 +60,24 @@ variable "wireguard_allowed_cidrs" {
     error_message = "wireguard_allowed_cidrs must not open WireGuard to the whole internet (0.0.0.0/0)."
   }
 }
+
+variable "proxy_port" {
+  description = "TCP/UDP port used by the sing-box proxy inbound"
+  type        = number
+  default     = 8388
+}
+
+variable "proxy_allowed_cidrs" {
+  description = "CIDR blocks allowed to connect to the sing-box proxy"
+  type        = list(string)
+
+  validation {
+    condition     = length(var.proxy_allowed_cidrs) > 0 && alltrue([for c in var.proxy_allowed_cidrs : can(cidrhost(c, 0))])
+    error_message = "proxy_allowed_cidrs must contain at least one valid CIDR block."
+  }
+
+  validation {
+    condition     = !contains(var.proxy_allowed_cidrs, "0.0.0.0/0")
+    error_message = "proxy_allowed_cidrs must not open the proxy to the whole internet (0.0.0.0/0)."
+  }
+}
