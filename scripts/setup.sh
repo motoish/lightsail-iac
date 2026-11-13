@@ -287,10 +287,19 @@ parse_args() {
   done
 }
 
+copy_sfm_profile_to_clipboard() {
+  local out="$WG_DIR/sfm-profile.json"
+  [[ -f "$out" ]] || return 0
+  command -v pbcopy >/dev/null 2>&1 || return 0
+  pbcopy <"$out"
+  log "copied ${out} to the clipboard"
+}
+
 print_next_steps() {
+  copy_sfm_profile_to_clipboard
   {
     printf '\nDone. Next:\n'
-    printf '  SFM       : import %s/sfm-profile.json (or paste its content) and start it\n' "$WG_DIR"
+    printf '  SFM       : paste from the clipboard into the tokyo-dev Profile (or import %s/sfm-profile.json) and start it\n' "$WG_DIR"
     printf '  SSH       : ssh %s\n' "$SSH_HOST_ALIAS"
     if ((IS_WIREGUARD_ENABLED)); then
       printf '  WireGuard : sudo wg-quick up %s/tokyo.conf && ping -c 3 10.8.0.1\n' "$WG_DIR"
