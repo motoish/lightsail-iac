@@ -22,7 +22,7 @@ variable "availability_zone" {
 variable "ssh_public_key_path" {
   description = "Path to the SSH public key registered as the instance key pair"
   type        = string
-  default     = "~/.ssh/id_ed25519.pub"
+  default     = "~/.ssh/lightsail-iac_dev.pub"
 }
 
 variable "ssh_allowed_cidrs" {
