@@ -1,0 +1,107 @@
+{
+  "log": {
+    "level": "info"
+  },
+  "dns": {
+    "servers": [
+      {
+        "type": "https",
+        "tag": "remote",
+        "detour": "proxy",
+        "server": "1.1.1.1"
+      },
+      {
+        "type": "local",
+        "tag": "local"
+      }
+    ],
+    "final": "remote"
+  },
+  "inbounds": [
+    {
+      "type": "tun",
+      "address": "172.19.0.1/30",
+      "auto_route": true
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "shadowsocks",
+      "tag": "proxy",
+      "server": "__PUBLIC_IP__",
+      "server_port": 8388,
+      "method": "2022-blake3-aes-128-gcm",
+      "password": "__SS_PASSWORD__"
+    },
+    {
+      "type": "direct",
+      "tag": "direct"
+    },
+    {
+      "type": "selector",
+      "tag": "select",
+      "outbounds": [
+        "proxy",
+        "direct"
+      ],
+      "default": "direct"
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "action": "sniff"
+      },
+      {
+        "protocol": "dns",
+        "action": "hijack-dns"
+      },
+      {
+        "ip_cidr": "__PUBLIC_IP__/32",
+        "outbound": "direct"
+      },
+      {
+        "ip_is_private": true,
+        "outbound": "direct"
+      },
+      {
+        "process_name": [
+          "aws",
+          "ssh"
+        ],
+        "outbound": "proxy"
+      },
+      {
+        "domain_suffix": [
+          "github.com",
+          "amazonaws.com",
+          "aws.amazon.com"
+        ],
+        "outbound": "direct"
+      },
+      {
+        "rule_set": "geoip-jp",
+        "outbound": "direct"
+      }
+    ],
+    "rule_set": [
+      {
+        "type": "remote",
+        "tag": "geoip-jp",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-jp.srs",
+        "http_client": {
+          "version": 2,
+          "detour": "direct"
+        }
+      }
+    ],
+    "final": "select",
+    "auto_detect_interface": true,
+    "default_domain_resolver": "local"
+  },
+  "experimental": {
+    "cache_file": {
+      "enabled": true
+    }
+  }
+}
