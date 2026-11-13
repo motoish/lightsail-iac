@@ -14,11 +14,17 @@ provider "aws" {
   profile = "lightsail-iac"
 }
 
+resource "aws_lightsail_key_pair" "this" {
+  name       = "${var.instance_name}-key"
+  public_key = file(pathexpand(var.ssh_public_key_path))
+}
+
 resource "aws_lightsail_instance" "this" {
   name              = var.instance_name
   availability_zone = var.availability_zone
   blueprint_id      = var.blueprint_id
   bundle_id         = var.bundle_id
+  key_pair_name     = aws_lightsail_key_pair.this.name
 }
 
 resource "aws_lightsail_static_ip" "this" {
@@ -37,6 +43,6 @@ resource "aws_lightsail_instance_public_ports" "ssh_only" {
     protocol  = "tcp"
     from_port = 22
     to_port   = 22
-    cidrs     = ["0.0.0.0/0"]
+    cidrs     = var.ssh_allowed_cidrs
   }
 }
