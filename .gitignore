@@ -37,3 +37,6 @@ override.tf.json
 terraform.rc
 
 tfplan
+
+*.md
+!README.md
